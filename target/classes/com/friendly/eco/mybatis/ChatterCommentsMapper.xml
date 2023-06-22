@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ChatterComments">
+
+	<resultMap type="ChatterComments" id="chatterCommentsMap">
+		<id column="chattercomments_idx" property="chattercomments_idx" />
+		<result column="chattercomments_detail" property="chattercomments_detail" />
+		<result column="chattercomments_regdate" property="chattercomments_regdate" />
+
+		<!-- 부모인 Chatter 연결 -->
+		<association 
+		column="chatter_idx" 
+		javaType="Chatter" 
+		property="chatter" 
+		select="Chatter.selectByPK" />
+
+		<!-- 부모인 Mem 연결 -->
+		<association 
+		column="mem_idx" 
+		javaType="Mem" 
+		property="mem" 
+		select="Mem.select" />
+	</resultMap>
+
+
+	<!-- C입력 -->
+	<insert id="insert" parameterType="ChatterComments">
+		insert into chatter_comments (chattercomments_idx, chatter_idx, mem_idx, chattercomments_detail)
+		values (seq_chatter_comments.nextval, #{chatter.chatter_idx}, #{mem.mem_idx}, #{chattercomments_detail})
+	</insert>
+
+	<!-- R조회 : Chatter에 속한 댓글 목록 -->
+	<select id="selectByChatterPK" parameterType="int" resultMap="chatterCommentsMap">
+		select * from chatter_comments
+		where chatter_idx = #{chatter_idx}
+	</select>
+
+	<!-- R조회 : 댓글 수 -->
+	<select id="selectCount" parameterType="int" resultMap="chatterCommentsMap">
+		select count(*) from chatter_comments
+		where chatter_idx = #{chatter_idx}
+	</select>
+
+	<!-- U수정 : mem_idx가 일치할 경우만 -->
+	<update id="update" parameterType="ChatterComments">
+		update chatter_comments set chattercomments_detail = #{chattercomments_detail}
+		where chatter_idx = #{chatter.chatter_idx} and mem_idx = #{mem.mem_idx}
+	</update>
+
+	<!-- D삭제 : mem_idx가 일치할 경우만 -->
+	<delete id="delete" parameterType="int">
+		delete from chatter_comments
+		where chatter_idx = #{chatter.chatter_idx} and mem_idx = #{mem.mem_idx}
+	</delete>
+</mapper>
